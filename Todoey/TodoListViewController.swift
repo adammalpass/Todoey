@@ -34,26 +34,49 @@ class TodoListViewController: UITableViewController {
     //MARK: - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(itemArray[indexPath.row])
+        //print(itemArray[indexPath.row])
         
         //tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         
-        print(tableView.cellForRow(at: indexPath)?.accessoryType)
+        //print(tableView.cellForRow(at: indexPath)?.accessoryType)
         
         if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark
         {
-            print("entered if")
+            //print("entered if")
             tableView.cellForRow(at: indexPath)?.accessoryType = .none
         }
         else
         {
-            print("else")
+            //print("else")
             tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-
+    //MARK: - Add new items
+    
+    
+    @IBAction func addNewTodoButton(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New ToDo", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add", style: .default) { (action) in
+            //print("Added Item")
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            textField = alertTextField
+        }
+        
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 
