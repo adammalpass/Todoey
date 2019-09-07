@@ -7,24 +7,25 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
+    let realm = try! Realm()
+    
     var categoryArray = [Category]()
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadCategories()
+        //loadCategories()
     }
 
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
         return categoryArray.count
     }
 
@@ -70,12 +71,12 @@ class CategoryViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             
-            let newCategory = Category(context: self.context)
+            let newCategory = Category()
             
             newCategory.name = textField.text!
             self.categoryArray.append(newCategory)
             
-            self.saveCategories()
+            self.saveCategories(category: newCategory)
             
         }
         
@@ -89,24 +90,26 @@ class CategoryViewController: UITableViewController {
         
     }
     
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest())
-    {
-        do
-        {
-            categoryArray = try context.fetch(request)
-            tableView.reloadData()
-        }
-        catch
-        {
-            print("Error fetching category data from context \(error)")
-        }
-    }
+//    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest())
+//    {
+//        do
+//        {
+//            categoryArray = try context.fetch(request)
+//            tableView.reloadData()
+//        }
+//        catch
+//        {
+//            print("Error fetching category data from context \(error)")
+//        }
+//    }
     
-    func saveCategories()
+    func saveCategories(category: Category)
     {
         do
         {
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         }
         catch
         {
