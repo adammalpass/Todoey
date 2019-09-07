@@ -95,6 +95,7 @@ class TodoListViewController: UITableViewController {
                     try self.realm.write {
                         let newToDo = Item()
                         newToDo.title = textField.text!
+                        newToDo.dateCreated = Date()
                         currentCategory.items.append(newToDo)
                         self.realm.add(newToDo)
                     }
@@ -119,7 +120,7 @@ class TodoListViewController: UITableViewController {
     
     func loadItems()
     {
-        items = realm.objects(Item.self)
+        items = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
     }
 
@@ -159,17 +160,10 @@ extension TodoListViewController: UISearchBarDelegate
     func searchItems(in searchBar: UISearchBar)
     {
         items = realm.objects(Item.self)
-        items = items?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
+        items = items?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+
         tableView.reloadData()
-        
-//        let request : NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@ AND parentCategory.name MATCHES %@",
-//            searchBar.text!, selectedCategory!.name!)
-//
-//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//
-//        loadItems(with: request, search: true)
+    
     }
 
 }
