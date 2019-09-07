@@ -15,6 +15,14 @@ class TodoListViewController: UITableViewController {
     //var itemArray = [ToDo]()
     var itemArray = [Item]()
     
+    var selectedCategory : Category?
+    {
+        didSet
+        {
+            loadItems()
+        }
+    }
+    
     //let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     //let defaults = UserDefaults.standard
@@ -105,6 +113,7 @@ class TodoListViewController: UITableViewController {
             
             newToDo.title = textField.text!
             newToDo.done = false
+            newToDo.parentCategory = self.selectedCategory
             self.itemArray.append(newToDo)
             
             self.saveItems()
@@ -151,7 +160,8 @@ class TodoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest())
+    //func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest())
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), search : Bool = false)
     {
 //        if let data = try? Data(contentsOf: dataFilePath!)
 //        {
@@ -165,6 +175,11 @@ class TodoListViewController: UITableViewController {
 //                print("Error decoding item array, \(error)")
 //            }
 //        }
+        if !search
+        {
+            let predicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+            request.predicate = predicate
+        }
         
         do
         {
@@ -173,7 +188,7 @@ class TodoListViewController: UITableViewController {
         }
         catch
         {
-            print("Error fetching data from context \(error)")
+            print("Error fetching item data from context \(error)")
         }
     }
 }
@@ -211,11 +226,12 @@ extension TodoListViewController: UISearchBarDelegate
     {
         let request : NSFetchRequest<Item> = Item.fetchRequest()
         
-        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@ AND parentCategory.name MATCHES %@",
+            searchBar.text!, selectedCategory!.name!)
         
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         
-        loadItems(with: request)
+        loadItems(with: request, search: true)
     }
     
 }
