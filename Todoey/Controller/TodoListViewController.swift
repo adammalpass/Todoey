@@ -8,9 +8,12 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController {
 
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     let realm = try! Realm()
     
     var items: Results<Item>?
@@ -26,8 +29,38 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         
-        //loadItems()
+        if let colourHex = selectedCategory?.backgroundColour
+        {
+            title = selectedCategory!.name
+            
+            updateNavBar(withHexCode: colourHex)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        updateNavBar(withHexCode: "1D9BF6")
+    }
+    
+    func updateNavBar(withHexCode: String)
+    {
+        guard let navBar = navigationController?.navigationBar else
+        {
+            fatalError("Navigation Controller does not exist")
+        }
+        
+        guard let navBarColour = UIColor(hexString: withHexCode) else
+        {fatalError()}
+        
+        navBar.barTintColor = navBarColour
+        navBar.tintColor = ContrastColorOf(navBarColour, returnFlat: true)
+        
+        navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColour, returnFlat: true)]
+        
+        searchBar.barTintColor = navBarColour
         
     }
     
@@ -42,6 +75,15 @@ class TodoListViewController: SwipeTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = items?[indexPath.row].title ?? "No items added yet"
+        
+        let categoryColour = selectedCategory?.backgroundColour ?? FlatRed().hexValue()
+        
+        
+        if let colour = UIColor(hexString: categoryColour)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(items!.count))
+        {
+            cell.backgroundColor = colour
+            cell.textLabel?.textColor = ContrastColorOf(colour, returnFlat: true)
+        }
         
         if items?[indexPath.row].done ?? false
         {
@@ -127,20 +169,34 @@ class TodoListViewController: SwipeTableViewController {
     
     override func deleteCell(at indexPath : IndexPath)
     {
-        do
-        {
-            try self.realm.write {
-                self.realm.delete(self.items![indexPath.row])
-            }
-            
-            //Not need to reloadData if use destructive swiping method
-            //tableView.reloadData()
-        }
-        catch
-        {
-            print("Error deleting item \(error)")
-        }
+//        do
+//        {
+//            try self.realm.write {
+//                self.realm.delete(self.items![indexPath.row])
+//            }
+//
+//            //Not need to reloadData if use destructive swiping method
+//            //tableView.reloadData()
+//        }
+//        catch
+//        {
+//            print("Error deleting item \(error)")
+//        }
         
+        if let item = items?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(item)
+                }
+            } catch {
+                print("Error deleting Item, \(error)")
+            }
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        //print("Did end displaying cell \(indexPath.row)")
+        tableView.reloadData()
     }
 
     
@@ -184,6 +240,8 @@ extension TodoListViewController: UISearchBarDelegate
         tableView.reloadData()
     
     }
+    
+    
 
 }
 

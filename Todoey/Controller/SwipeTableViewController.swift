@@ -15,6 +15,7 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
         super.viewDidLoad()
         
         tableView.rowHeight = 80.0
+        tableView.separatorStyle = .none
     }
 
     
@@ -37,7 +38,6 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
             print("Item deleted")
             
             self.deleteCell(at: indexPath)
-            
         }
         
         // customize the action appearance

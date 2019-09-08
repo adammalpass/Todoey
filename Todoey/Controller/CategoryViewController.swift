@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
 
@@ -35,6 +36,10 @@ class CategoryViewController: SwipeTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet"
+        
+        cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].backgroundColour ?? UIColor.flatWhite.hexValue())
+        
+        cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)
 
         return cell
     }
@@ -51,6 +56,7 @@ class CategoryViewController: SwipeTableViewController {
         if let indexPath = tableView.indexPathForSelectedRow
         {
             destinationVC.selectedCategory = categories?[indexPath.row]
+            //print(categories!)
         }
     }
     
@@ -60,6 +66,26 @@ class CategoryViewController: SwipeTableViewController {
         performSegue(withIdentifier: "goToItems", sender: self)
     }
     
+    
+//    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+//        if (editingStyle == UITableViewCell.EditingStyle.delete) {
+//            // by deleting you can update tableview
+//            tableView.reloadData()
+//            print("Deleting cell")
+//        }}
+//
+    
+//    override func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?)
+//    {
+//        print("did end editing")
+//        guard let indexPath = indexPath else {return}
+//        tableView.reloadRows(at: [indexPath], with: .none)
+//    }
+    
+    override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        //print("Did end displaying cell \(indexPath.row)")
+        tableView.reloadData()
+    }
     
     //MARK: - Data Manipulation Methods
     
@@ -74,6 +100,7 @@ class CategoryViewController: SwipeTableViewController {
             let newCategory = Category()
             
             newCategory.name = textField.text!
+            newCategory.backgroundColour = UIColor.randomFlat.hexValue()
             
             self.saveCategory(category: newCategory)
             
