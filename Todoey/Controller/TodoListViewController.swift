@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
 
     let realm = try! Realm()
     
@@ -38,7 +38,8 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        //let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = items?[indexPath.row].title ?? "No items added yet"
         
@@ -122,6 +123,24 @@ class TodoListViewController: UITableViewController {
     {
         items = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
+    }
+    
+    override func deleteCell(at indexPath : IndexPath)
+    {
+        do
+        {
+            try self.realm.write {
+                self.realm.delete(self.items![indexPath.row])
+            }
+            
+            //Not need to reloadData if use destructive swiping method
+            //tableView.reloadData()
+        }
+        catch
+        {
+            print("Error deleting item \(error)")
+        }
+        
     }
 
     
